@@ -63,69 +63,69 @@ int g_move_forward = 1 ;
 /*Function for executing the line following using a PID controller*/
 sub linefollow( int motor_speed)
 {
-	/*Fixed set point from which error in PID system is measured*/
-	int setpoint = 50;
-	int error;
-	static int previous_error = 0;
+    /*Fixed set point from which error in PID system is measured*/
+    int setpoint = 50;
+    int error;
+    static int previous_error = 0;
 
-	/*PID parameters. Values obtained after calibration*/
-    int Kproportional	= 80;
-    int Kintegral 		= 5;
-    int Kderivative 	= 150;
+    /*PID parameters. Values obtained after calibration*/
+    int Kproportional    = 80;
+    int Kintegral         = 5;
+    int Kderivative     = 150;
 
     int proportional_comp;
-	int derivativel_comp;
-	int integral_comp;
-	/*variable hold the error speed which is used to correct the deviation
-	from path*/
-	int motor_speed_pid;								  
-	
-	/*measuring the actual reflection instensity value from the ligh sensor*/
+    int derivativel_comp;
+    int integral_comp;
+    /*variable hold the error speed which is used to correct the deviation
+    from path*/
+    int motor_speed_pid;                                  
+    
+    /*measuring the actual reflection instensity value from the ligh sensor*/
     pos_lightsensor = Sensor(IN_4);                       
-    error 			= setpoint - pos_lightsensor;         
+    error           = setpoint - pos_lightsensor;         
 
-    proportional_comp 	= Kproportional * error;
-    integral_comp 		= (((2*integral_comp)/3)+error);
-    derivativel_comp 	= error+previous_error;
+    proportional_comp    = Kproportional * error;
+    integral_comp        = (((2*integral_comp)/3)+error);
+    derivativel_comp     = error+previous_error;
 
 
-    motor_speed_pid 	= ((proportional_comp) + (Kintegral *integral_comp)+ (Kderivative*derivativel_comp));
-    motor_speed_pid		= (motor_speed_pid/100);
+    motor_speed_pid     = ((proportional_comp) + (Kintegral *integral_comp)+ (Kderivative*derivativel_comp));
+    motor_speed_pid     = (motor_speed_pid/100);
 
-	/*Error value is adjusted from the fixed speed to correct the deviation*/
-    OnFwd(OUT_A, (motor_speed + motor_speed_pid));			
-    OnFwd(OUT_C, (motor_speed - motor_speed_pid));			
-	
-	previous_error 		= error;
+    /*Error value is adjusted from the fixed speed to correct the deviation*/
+    OnFwd(OUT_A, (motor_speed + motor_speed_pid));            
+    OnFwd(OUT_C, (motor_speed - motor_speed_pid));            
+    
+    previous_error      = error;
 
 }
 
 /*Function to update the cordinates after each junction is encountered*/
 sub robot_coordinate_updt(x_cord, y_cord, g_dir)
 {
-	if (g_dir == DIRECTION_EAST) {
-	
-		m_array[--x_cord][y_cord] += 1;
-		m_array[--x_cord][y_cord] += 1;
-	}
+    if (g_dir == DIRECTION_EAST) {
+    
+        m_array[--x_cord][y_cord] += 1;
+        m_array[--x_cord][y_cord] += 1;
+    }
 
-	else if(g_dir == DIRECTION_SOUTH) {
-	
-		m_array[x_cord][++y_cord] += 1;
-		m_array[x_cord][++y_cord] += 1;
-	}
-	
-	else if (g_dir == DIRECTION_WEST) {
+    else if(g_dir == DIRECTION_SOUTH) {
+    
+        m_array[x_cord][++y_cord] += 1;
+        m_array[x_cord][++y_cord] += 1;
+    }
+    
+    else if (g_dir == DIRECTION_WEST) {
 
-		m_array[++x_cord][y_cord] += 1;
-		m_array[++x_cord][y_cord] += 1;
-	}
-	
-	else if (g_dir == DIRECTION_NORTH) {
+        m_array[++x_cord][y_cord] += 1;
+        m_array[++x_cord][y_cord] += 1;
+    }
+    
+    else if (g_dir == DIRECTION_NORTH) {
 
-		m_array[x_cord][--y_cord] += 1;
-		m_array[x_cord][--y_cord] += 1 ;
-	}
+        m_array[x_cord][--y_cord] += 1;
+        m_array[x_cord][--y_cord] += 1 ;
+    }
 
 }
 
@@ -134,87 +134,87 @@ Please note that values can be different for different tracks.
 Read the BrixCC manual for configuring these values.*/
 sub motor_uturn() {
 
-	RotateMotorEx(OUT_AC, 70, 120, 0, 0, 0);
-	RotateMotorEx(OUT_AC, 70, 550, 100, true, true );
-	RotateMotorEx(OUT_AC, 70, 150, 0, 0, 0);
-	RotateMotorEx(OUT_A, 30, -85, 0, 0, 0 );
-	RotateMotorEx(OUT_AC, 30, -200, 0, 0, 0);
-}			
+    RotateMotorEx(OUT_AC, 70, 120, 0, 0, 0);
+    RotateMotorEx(OUT_AC, 70, 550, 100, true, true );
+    RotateMotorEx(OUT_AC, 70, 150, 0, 0, 0);
+    RotateMotorEx(OUT_A, 30, -85, 0, 0, 0 );
+    RotateMotorEx(OUT_AC, 30, -200, 0, 0, 0);
+}            
 
 task main()
 {
-	
-	/* Variable to read the light sensor value before and after the rotation 
-	of the light sensor and understands the deviation from the 
-	black path*/
-	int pos_lightsensor_after_rotation;
-	int pos_lightsensor;
-	
-    /* Map is stored as 2D array and initialised to zero*/
-	ArrayInit(m_array, 0, MAP_ARRAY_SIZE);                        
     
-	/* Declaring the destination x and y co-ordinate*/
+    /* Variable to read the light sensor value before and after the rotation 
+    of the light sensor and understands the deviation from the 
+    black path*/
+    int pos_lightsensor_after_rotation;
+    int pos_lightsensor;
+    
+    /* Map is stored as 2D array and initialised to zero*/
+    ArrayInit(m_array, 0, MAP_ARRAY_SIZE);                        
+    
+    /* Declaring the destination x and y co-ordinate*/
     int x_end;
     int y_end;
-	
-	/* Declaring and intializing an arbitary starting location*/
+    
+    /* Declaring and intializing an arbitary starting location*/
     int x_start = ORIGIN
     int y_start = ORIGIN;
-	
-	/* Cordinates holding the present cordinates while traversing through the array,
-	Intialised to the starting position*/
+    
+    /* Cordinates holding the present cordinates while traversing through the array,
+    Intialised to the starting position*/
     int x_cord = x_start;
     int y_cord = y_start;
 
-	/*Return and forward journey flags. Forward journey intialised first */
-    int reverse_t = 0;	 								
-    int forward_t = 1;									
-	
-	/*Robot forward facing neighbours points*/
+    /*Return and forward journey flags. Forward journey intialised first */
+    int reverse_t = 0;
+    int forward_t = 1;
+    
+    /*Robot forward facing neighbours points*/
     int robot_front; 
-	int robot_right; 
-	int robot_left;
+    int robot_right; 
+    int robot_left;
     
-	/*timer variables. 
-	time : present time
-	time_0: starting time*/
-	long time_0 = 0;
-	long time 	= 0;
+    /*timer variables. 
+    time : present time
+    time_0: starting time*/
+    long time_0 = 0;
+    long time     = 0;
  
-	/*Holds the next turn that the robot is supposed to take*/
-	int next_turn 	= NO_TURN;
+    /*Holds the next turn that the robot is supposed to take*/
+    int next_turn     = NO_TURN;
     
-	/*Flag to hold the information about the last turn robot has taken */
-	int last_turn 	= NO_TURN;
-	
-	/*Set if a dead end is encountered*/
+    /*Flag to hold the information about the last turn robot has taken */
+    int last_turn     = NO_TURN;
+    
+    /*Set if a dead end is encountered*/
     int flagDeadEnd = 0;
-	
-	/*Set if a U Turn is detected/Required*/
-    int flag_uturn 	= 0;
+    
+    /*Set if a U Turn is detected/Required*/
+    int flag_uturn     = 0;
 
     /*Distance that can be traveresed in full speed without checking
-	for a junction*/
-	int setdistance;
+    for a junction*/
+    int setdistance;
 
-	/*During the forard journey. This is used to plot the map of the maze. 
-	Robot doesnt look for shortest path. 
-	The robot is by default right following*/
+    /*During the forard journey. This is used to plot the map of the maze. 
+    Robot doesnt look for shortest path. 
+    The robot is by default right following*/
     while(forward_t) {
-	
+    
         /*Turn ON the light and Ultrasonic sensor in the corresponding connection port 3 and 4*/
-		SetSensorLight(IN_4);
+        SetSensorLight(IN_4);
         SetSensorLowspeed(IN_3);
 
         if(g_move_forward) {
-		
+        
             ResetRotationCount(OUT_C);
-			
-			/*Blindly do line follow without any juncttion checks*/
+            
+            /*Blindly do line follow without any juncttion checks*/
             do {
                 linefollow(HIGH_SPEED);
                 time = CurrentTick()-time_0;
-				
+                
             } while(MotorRotationCount(OUT_C) < setdistance)
 
             ResetRotationCount(OUT_C);
@@ -223,153 +223,153 @@ task main()
         }
 
         linefollow(SLOW_SPEED);
-		
-		/*If a black junction is found, switch off the wheel motor and turn the light sensor 90 degree to confirm it is a junction*/
+        
+        /*If a black junction is found, switch off the wheel motor and turn the light sensor 90 degree to confirm it is a junction*/
         if (pos_lightsensor < BLACK_STRP_CODE) {
-		
+        
             Off(OUT_AC);
-			
+            
             RotateMotor(OUT_B, LIGHT_MOTOR_SPEED , ROTATE_CLOCKWISE);
-			
+            
             pos_lightsensor_after_rotation = Sensor(IN_4);
 
             if (pos_lightsensor_after_rotation < BLACK_STRP_CODE ) {
-			
+            
                 g_move_forward = 1;
 
                 PlaySound(SOUND_LOW_BEEP);
-				
-				/*While mapping when right is free, turn right. The cordinates of x and
-				y should be updated after checking the last orientation of the robot*/
+                
+                /*While mapping when right is free, turn right. The cordinates of x and
+                y should be updated after checking the last orientation of the robot*/
                 if(SensorUS(IN_3) > ULTRA_SONIC_CLOSE_RANGE ) {
-				
+                
                     last_turn = RIGHT_TURN;
                     RotateMotor(OUT_B, LIGHT_MOTOR_SPEED, ROTATE_ANTI_CLOCKWISE);
-					
-					/*Values hard coded to meet the exact turning angle.*/
-                    RotateMotorPID(OUT_C, 70,535, 20, 40, 100 );
-					
-					robot_coordinate_updt(x_cord, y_cord);
                     
-					/*Update the direction after encountering a change in direcction.
-					New direction will be relative to the prevvious direction*/
-					if (g_dir == DIRECTION_EAST) 
-				        g_dir = DIRECTION_SOUTH;
+                    /*Values hard coded to meet the exact turning angle.*/
+                    RotateMotorPID(OUT_C, 70,535, 20, 40, 100 );
+                    
+                    robot_coordinate_updt(x_cord, y_cord);
+                    
+                    /*Update the direction after encountering a change in direcction.
+                    New direction will be relative to the prevvious direction*/
+                    if (g_dir == DIRECTION_EAST) 
+                        g_dir = DIRECTION_SOUTH;
     
                     else if (g_dir == DIRECTION_SOUTH) 
-					    g_dir = DIRECTION_WEST;
+                        g_dir = DIRECTION_WEST;
               
                     else if (g_dir == DIRECTION_WEST) 
-						g_dir = DIRECTION_NORTH	
+                        g_dir = DIRECTION_NORTH    
 
                     else if (g_dir == DIRECTION_NORTH) 
-						g_dir = DIRECTION_EAST;
+                        g_dir = DIRECTION_EAST;
                     
 
-                }		// end of if(SensorUS(IN_3) > ULTRA_SONIC_CLOSE_RANGE ) : if free right
-				
-				/* Else if the right is not free, continure going in the forward direction*/
+                }        // end of if(SensorUS(IN_3) > ULTRA_SONIC_CLOSE_RANGE ) : if free right
+                
+                /* Else if the right is not free, continure going in the forward direction*/
                 else {
 
                     RotateMotor(OUT_B,LIGHT_MOTOR_SPEED , ROTATE_ANTI_CLOCKWISE);
-					
-					/* Checking if the robot's front is free*/
+                    
+                    /* Checking if the robot's front is free*/
                     if ( SensorUS (IN_3) > ULTRA_SONIC_CLOSE_RANGE) {
-					
+                    
                         last_turn = NO_TURN;
-						robot_coordinate_updt(x_cord, y_cord);
+                        robot_coordinate_updt(x_cord, y_cord);
 
-                    }		
-				
-					/*In case the front and right  side is blocked, next check left side*/
+                    }        
+                
+                    /*In case the front and right  side is blocked, next check left side*/
                     else {
-					
+                    
                         last_turn = LEFT_TURN;
                         flagDeadEnd = 1;
                         RotateMotor(OUT_B, LIGHT_MOTOR_SPEED , ROTATE_CLOCKWISE);        
-						
+                        
                         if ( SensorUS(IN_3) > ULTRA_SONIC_CLOSE_RANGE ) {
 
                             flagDeadEnd = 0;
-							
-							/*Rotate left, value hard coded to match the track specification.
-							please verify the track before using these values*/
-					        RotateMotorEx(OUT_AC, 70, 100, 0, 0, 0);	
-						
-							robot_coordinate_updt(x_cord, y_cord);
+                            
+                            /*Rotate left, value hard coded to match the track specification.
+                            please verify the track before using these values*/
+                            RotateMotorEx(OUT_AC, 70, 100, 0, 0, 0);    
+                        
+                            robot_coordinate_updt(x_cord, y_cord);
 
                             if (g_dir == DIRECTION_EAST)
                                 g_dir = DIRECTION_NORTH;
                             
-							else if (g_dir == DIRECTION_SOUTH)
+                            else if (g_dir == DIRECTION_SOUTH)
                                 g_dir = DIRECTION_EAST;
 
                             else if (g_dir == DIRECTION_WEST)
                                 g_dir = DIRECTION_SOUTH;
-								
+                                
                             else if (g_dir == DIRECTION_NORTH)
                                  g_dir = DIRECTION_WEST;
 
-						}		//end of if ( SensorUS(IN_3) > ULTRA_SONIC_CLOSE_RANGE ) : if left is free
-						
-						RotateMotor(OUT_B, LIGHT_MOTOR_SPEED , ROTATE_CLOCKWISE);     
-					}    
-				}		//end of checking right, forward and left for obstacle.
-			
-				/*A dead end is reached in case previous cases are not
-				satisfied, take a row_iter-turn*/
-				if (  flagDeadEnd == 1) {
-				
-					motor_uturn();
-				
-					robot_coordinate_updt(x_cord, y_cord);
-					
-					/*Direction update after a U turn*/
-					if (g_dir == DIRECTION_EAST)
-						g_dir = DIRECTION_WEST;
-           
-					else if (g_dir == DIRECTION_SOUTH) 
-						g_dir = DIRECTION_NORTH;
-                    
-					else if (g_dir == DIRECTION_WEST)
-						g_dir = DIRECTION_EAST;
-                   
-					else if (g_dir == DIRECTION_NORTH) 
-						g_dir = DIRECTION_SOUTH;
-					
-					/*setting a high value to mark the dead end*/
-					m_array[x_cord][y_cord] = DEAD_END; 
-
-					flagDeadEnd	= 0;
-					flag_uturn 	= 1;
-					
-				} 	//if (  flagDeadEnd == 1)	:	end of checking for dead end
-
-
-			}		//if (pos_lightsensor_after_rotation < BLACK_STRP_CODE )	:	end of a junction is reached
-         
-			/* if not a junction, just rotate back the Ultra sensor */
-			else {
+                        }        //end of if ( SensorUS(IN_3) > ULTRA_SONIC_CLOSE_RANGE ) : if left is free
+                        
+                        RotateMotor(OUT_B, LIGHT_MOTOR_SPEED , ROTATE_CLOCKWISE);     
+                    }    
+                }        //end of checking right, forward and left for obstacle.
             
-			RotateMotor(OUT_B, LIGHT_MOTOR_SPEED, ROTATE_ANTI_CLOCKWISE);     
-			
-			}
+                /*A dead end is reached in case previous cases are not
+                satisfied, take a row_iter-turn*/
+                if (  flagDeadEnd == 1) {
+                
+                    motor_uturn();
+                
+                    robot_coordinate_updt(x_cord, y_cord);
+                    
+                    /*Direction update after a U turn*/
+                    if (g_dir == DIRECTION_EAST)
+                        g_dir = DIRECTION_WEST;
+           
+                    else if (g_dir == DIRECTION_SOUTH) 
+                        g_dir = DIRECTION_NORTH;
+                    
+                    else if (g_dir == DIRECTION_WEST)
+                        g_dir = DIRECTION_EAST;
+                   
+                    else if (g_dir == DIRECTION_NORTH) 
+                        g_dir = DIRECTION_SOUTH;
+                    
+                    /*setting a high value to mark the dead end*/
+                    m_array[x_cord][y_cord] = DEAD_END; 
 
-		}	// if (pos_lightsensor < BLACK_STRP_CODE)	:	end of check for a black strip junction
-		
-	}		//while(forward_t)	: end of forward journey
-	
+                    flagDeadEnd    = 0;
+                    flag_uturn     = 1;
+                    
+                }     //if (  flagDeadEnd == 1)    :    end of checking for dead end
+
+
+            }        //if (pos_lightsensor_after_rotation < BLACK_STRP_CODE )    :    end of a junction is reached
+         
+            /* if not a junction, just rotate back the Ultra sensor */
+            else {
+            
+            RotateMotor(OUT_B, LIGHT_MOTOR_SPEED, ROTATE_ANTI_CLOCKWISE);     
+            
+            }
+
+        }    // if (pos_lightsensor < BLACK_STRP_CODE)    :    end of check for a black strip junction
+        
+    }        //while(forward_t)    : end of forward journey
+    
     /*if reverse flag is encountered.i.e; robot is starting to come back*/
     if (reverse_t) {
        
-		/* Iterator declaration for the 2D array*/
-		int row_iter;
-		int col_iter;
-		
-		/* File handling variables*/
-		byte fileHandle;
-		short bytesWritten;
-		string write_value;
+        /* Iterator declaration for the 2D array*/
+        int row_iter;
+        int col_iter;
+        
+        /* File handling variables*/
+        byte fileHandle;
+        short bytesWritten;
+        string write_value;
 
         PlaySound(SOUND_FAST_UP);
 
@@ -379,13 +379,13 @@ task main()
 
         write_value="";
         WriteLnString(fileHandle,write_value, bytesWritten);
-			  
+              
         for(int row_iter = 0 ;row_iter < map_array_size; row_iter++) {
-		
+        
             write_value="";
-	 
+     
             for(col_iter = 0; col_iter < MAP_ARRAY_SIZE; col_iter++) {
-			
+            
                 write_value = strncat(write_value, NumToStr(m_array[row_iter][col_iter]), bytesWritten);
                 write_value = strncat(write_value,"  ",bytesWritten);
             }
@@ -393,30 +393,30 @@ task main()
             WriteLnString(fileHandle, write_value, bytesWritten);
         }
         
-		CloseFile(fileHandle);
+        CloseFile(fileHandle);
         
-		/*Start the actual return journey throught the shortest path*/
+        /*Start the actual return journey throught the shortest path*/
         while (reverse_t) {
 
-			/*Determine the adjacent cordinates based on the current location and directon of the motion
-			This is used to determine which adjacent block has the least amount of weight and go in 
-			that direction*/
+            /*Determine the adjacent cordinates based on the current location and directon of the motion
+            This is used to determine which adjacent block has the least amount of weight and go in 
+            that direction*/
             if (g_dir == DIRECTION_EAST) {
-			
+            
                 robot_front = m_array[x_cord - 1][y_cord] ;
                 robot_right = m_array[x_cord][y_cord - 1];
                 robot_left = m_array[x_cord][y_cord + 1];
 
             }
             else if (g_dir == DIRECTION_SOUTH) {
-			
+            
                 robot_front = m_array[x_cord ][y_cord + 1] ;
                 robot_right = m_array[x_cord - 1][y_cord ];
                 robot_left = m_array[x_cord + 1][y_cord ];
 
             }
             else if (g_dir == DIRECTION_WEST) {
-			
+            
                 robot_front = m_array[x_cord + 1][y_cord] ;
                 robot_right = m_array[x_cord][y_cord + 1];
                 robot_left = m_array[x_cord][y_cord - 1];
@@ -424,7 +424,7 @@ task main()
             }
 
             else if (g_dir == DIRECTION_NORTH) {
-			
+            
                 robot_front = m_array[x_cord][y_cord - 1];
                 robot_right = m_array[x_cord + 1][y_cord];
                 robot_left = m_array[x_cord - 1][y_cord];
@@ -432,131 +432,131 @@ task main()
             }
 
             /*finding the smallest among the robot_front robot_right andd robot_left and based on that, 
-			setting the direction the robot should chage  using next_turn
-			
-			TODO: Chanfe to a seperate function to increase the readability of the program*/
-			
-			int smallst_neighbr;
-			
+            setting the direction the robot should chage  using next_turn
+            
+            TODO: Chanfe to a seperate function to increase the readability of the program*/
+            
+            int smallst_neighbr;
+            
             smallst_neighbr = robot_front;
-			
+            
             next_turn = NO_TURN;
 
             if (smallst_neighbr > robot_right) {
-			
+            
                 smallst_neighbr = robot_right;
                 next_turn = RIGHT_TURN;
             }
 
             if (smallst_neighbr > robot_left) {
-			
+            
                 smallst_neighbr = robot_left;
                 next_turn = LEFT_TURN ;
             }
 
-			/*After setting the direction above, following code is used to update the cordinates*/
+            /*After setting the direction above, following code is used to update the cordinates*/
 
             if (next_turn == NO_TURN) {
 
                 if (g_dir == DIRECTION_EAST) 
-					x_cord--;
+                    x_cord--;
 
-				if(g_dir == DIRECTION_SOUTH)
+                if(g_dir == DIRECTION_SOUTH)
                     y_cord++;
 
-				if (g_dir == DIRECTION_WEST)
+                if (g_dir == DIRECTION_WEST)
                     x_cord++;
                 
-				if (g_dir == DIRECTION_NORTH)
+                if (g_dir == DIRECTION_NORTH)
                     y_cord--;
-			}
+            }
 
-			else if (next_turn == RIGHT_TURN) {
-			
+            else if (next_turn == RIGHT_TURN) {
+            
                 last_turn = RIGHT_TURN;
-				
+                
                 if (g_dir == DIRECTION_EAST) {
-				
+                
                     g_dir = DIRECTION_NORTH;      
                     y_cord--;
                 }
-				
+                
                 else if(g_dir == DIRECTION_SOUTH) {
-				
+                
                     g_dir = DIRECTION_EAST;
                     x_cord--;
                 }
-				
+                
                 else if ( g_dir == DIRECTION_WEST) {
-				
+                
                     g_dir = DIRECTION_SOUTH;
                     y_cord++;
                 }
-				
+                
                 else if (g_dir == DIRECTION_NORTH) {
-				
+                
                     g_dir = DIRECTION_WEST;
                     x_cord++;
-				}
-				
-				/*Turn left*/
-                RotateMotorEx(OUT_AC, 70, 100, 0, 0, 0); 	
+                }
+                
+                /*Turn left*/
+                RotateMotorEx(OUT_AC, 70, 100, 0, 0, 0);     
             }
-			
+            
             else if (next_turn == LEFT_TURN)     
             {
                last_turn = LEFT_TURN;
-			   
+               
                 if (g_dir == DIRECTION_EAST) {
-				
+                
                     g_dir = DIRECTION_SOUTH;
                     y_cord++;
                 }
 
                 else if(g_dir == DIRECTION_SOUTH) {
-				
+                
                     g_dir = DIRECTION_WEST;
                     x_cord++;
                 }
 
                 else if ( g_dir == DIRECTION_WEST) {
-				
+                
                     g_dir = DIRECTION_NORTH;
                     y_cord--;
                 }
 
                 else if (g_dir == DIRECTION_NORTH) {
-				
+                
                     g_dir = DIRECTION_EAST;
                     x_cord--;
                 }
-				
-				/*Motor rotate right*/
-				RotateMotorPID(OUT_C, 70,535, 20, 40, 100 );                  
+                
+                /*Motor rotate right*/
+                RotateMotorPID(OUT_C, 70,535, 20, 40, 100 );                  
             } 
-			
+            
             if(g_move_forward) {
-			
+            
                 ResetRotationCount(OUT_C);
-				
-				do {
-			
+                
+                do {
+            
                 linefollow(HIGH_SPEED );
                 time = CurrentTick()- time_0;
-				
-				}while(MotorRotationCount(OUT_C) < setdistance)
+                
+                }while(MotorRotationCount(OUT_C) < setdistance)
 
             g_move_forward = 0;
 
-			}
+            }
 
-			/*Origin is reached. Destination is reached successfully !*/
-			if (x_cord == ORIGIN && ycord == ORIGIN) {
-			reverse_t = 0;
+            /*Origin is reached. Destination is reached successfully !*/
+            if (x_cord == ORIGIN && ycord == ORIGIN) {
+            reverse_t = 0;
 
-			}
+            }
 
-		} 	// end of while return journey
-	}		// end of return flag encountered
+        }     // end of while return journey
+    }        // end of return flag encountered
 
-} 			//end of main
+}             //end of main
